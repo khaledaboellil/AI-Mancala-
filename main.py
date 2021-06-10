@@ -168,7 +168,7 @@ else:
         depth = 7
     else:
         depth = 10
-    value = randint(0, 1)  # if value = 0 player start else bot start
+    value = int(input("Enter 0 for start first or 1 to let bot start "))  # if value = 0 player start else bot start
     if value == 0:
         print("=============== Player One ===============")
     else:
