@@ -204,14 +204,17 @@ while playing:
         if 0 <= num <= 5 and board[num] != 0:
             playagain = moving(board, num, stealing)
             print("Move ==> {}".format(get_key(num)))
-            if withBot:
-                print("================ Bot =================")
-            else :
-                print("============ Player Two ==============")
-            Game_design(board)
-            print("==========================================")
             if playagain != 1:
                 playerone = False
+                if withBot:
+                    print("================ Bot =================")
+                else:
+                    print("============ Player Two ==============")
+            else:
+                print("============ Player One ==============")
+            Game_design(board)
+            print("==========================================")
+
         else:
             print("invalid play")
             print("\n")
@@ -232,14 +235,16 @@ while playing:
         if 7 <= num <= 13 and board[num] != 0:
             playagain = moving(board, num, stealing)
             print("Move ==> {}".format(get_key(num)))
-            if withBot:
-                print("================ Bot =================")
-            else:
-                print("============ Player One ==============")
-            Game_design(board)
-            print("==========================================")
             if playagain != 1:
                 playerone = True
+                if withBot:
+                    print("================ Bot =================")
+                else:
+                    print("============ Player One ==============")
+            else:
+                print("============ Player Two ==============")
+            Game_design(board)
+            print("==========================================")
         else:
             print("invalid play")
             print("\n")
