@@ -1,6 +1,7 @@
 from random import randint
 from datetime import datetime
-
+import mancala
+from mancala import max_value, min_value
 board = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0]
 thisdict = {
     "A": 0,
@@ -105,55 +106,6 @@ def moving(board, num, stealing):
     return flag
 
 
-def heuristicVal(board):
-    if is_end(board):
-        if board[13] > board[6]:
-            return 100
-        elif board[13] == board[6]:
-            return 0
-        else:
-            return -100
-    else:
-        return board[13] - board[6]
-
-
-def minnmax(board, depth, alpha, beta, MinorMax, stealing):
-    if depth == 0 or is_end(board):
-        # print("reached ")
-        return heuristicVal(board), -1
-    if MinorMax:
-        v = -1000000
-        move = -1
-        for i in range(7, 13, 1):
-            if board[i] == 0: continue
-            a = board[:]
-            minormax = moving(a, i, stealing);
-            newv, _ = minnmax(a, depth - 1, alpha, beta, minormax, stealing)
-            if v < newv:
-                move = i
-                v = newv
-            alpha = max(alpha, v)
-            if alpha >= beta:
-                # print("breaking ", i)
-                break
-        return v, move
-    else:
-        v = 1000000
-        move = -1
-        for i in range(0, 6, 1):
-            if board[i] == 0: continue
-            a = board[:]
-            minormax = moving(a, i, stealing);
-            newv, _ = minnmax(a, depth - 1, alpha, beta, not minormax, stealing)
-            if v > newv:
-                move = i
-                v = newv
-            beta = min(beta, v)
-            if alpha >= beta:
-                # print("breaking ", i)
-                break
-        return v, move
-
 
 def is_end(board):  # check if game is end
     if sum(board[0:6]) == 0 or sum(board[7:13]) == 0:
@@ -175,9 +127,7 @@ def end_of_game(board):  # if game is end so print scores
         if board[6] > board[13]:
             print("player one win ")
             print("score", board[6], ":", board[13])
-        elif board[6] == board[13]:
-            print("Draw ")
-            print("score", board[13], ":", board[6])
+
         else:
             print("player two win ")
             print("score", board[13], ":", board[6])
@@ -257,7 +207,8 @@ while playing:
     while bot:
         # num = input("player two Enter the number")
         # num = convert(num)
-        _, num = minnmax(board, depth, -100000, 100000, True, stealing)
+        # _, num = minnmax(board, depth, -100000, 100000, True, stealing)
+        _, num = min_value((board, 0), depth, stealing = stealing)
         if 7 <= num <= 12 and board[num] != 0:
             playagain = moving(board, num, stealing)
             print("Move ==> {}".format(get_key(num)))
