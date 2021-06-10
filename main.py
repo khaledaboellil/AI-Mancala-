@@ -1,6 +1,5 @@
 from random import randint
 from datetime import datetime
-import mancala
 from mancala import max_value, min_value
 board = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0]
 thisdict = {
@@ -127,6 +126,9 @@ def end_of_game(board):  # if game is end so print scores
         if board[6] > board[13]:
             print("player one win ")
             print("score", board[6], ":", board[13])
+        elif board[6] == board[13]:
+            print("Draw")
+            print("score", board[6], ":", board[13])
 
         else:
             print("player two win ")
@@ -205,9 +207,6 @@ while playing:
         break
 
     while bot:
-        # num = input("player two Enter the number")
-        # num = convert(num)
-        # _, num = minnmax(board, depth, -100000, 100000, True, stealing)
         _, num = min_value((board, 0), depth, stealing = stealing)
         if 7 <= num <= 12 and board[num] != 0:
             playagain = moving(board, num, stealing)
