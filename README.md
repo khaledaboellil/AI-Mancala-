@@ -1,1 +1,1 @@
-# AI-Mancala-
+# Mancala-AI
