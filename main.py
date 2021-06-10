@@ -29,12 +29,13 @@ def Game_design(board):
                                                                    board[5]))
 
 
-def moving_withoutstealing(board, num):
+
+
+def moving(board, num, stealing):
     flag = 0
     sum = board[num]
     board[num] = 0
     index = num + 1
-
     for i in range(sum):
 
         if index == 6:
@@ -53,91 +54,22 @@ def moving_withoutstealing(board, num):
             board[index % 14] += 1
 
         index += 1
-    if index - 1 % 14 == 6 or index - 1 % 14 == 13:
+    vr = index - 1 % 14
+    if (stealing):
+        if num <= 5 and vr <= 5:
+            if board[vr] == 1:
+                if board[12 - vr] != 0:
+                    board[6] += (board[12 - vr] + 1)
+                    board[12 - vr], board[vr] = 0, 0
+        elif num > 6 and 6 < vr < 13:
+            if board[vr] == 1:
+                if board[12 - vr] != 0:
+                    board[13] += (board[12 - vr] + 1)
+                    board[vr], board[12 - vr] = 0, 0
+
+    if vr == 6 or vr == 13:
         flag = 1
-    return flag
 
-
-def moving_withstealing(board, num):
-    flag = 0
-    sum = board[num]
-    board[num] = 0
-    index = num + 1
-
-    for i in range(sum):
-
-        if index == 6:
-            if num > 5:
-                index += 1
-                board[index % 14] += 1
-            else:
-                board[index % 14] += 1
-        elif index == 13:
-            if num <= 5:
-                index += 1
-                board[index % 14] += 1
-            else:
-                board[index % 14] += 1
-        else:
-            board[index % 14] += 1
-
-        index += 1
-    if num <= 5 and index - 1 % 14 <= 5:
-        if board[index - 1 % 14] == 1:
-
-            if index - 1 % 14 == 5:
-                board[6] += (board[7] + 1)
-                board[7] = 0
-                board[5] = 0
-            elif index - 1 % 14 == 4:
-                board[6] += (board[8] + 1)
-                board[4] = 0
-                board[8] = 0
-            elif index - 1 % 14 == 3:
-                board[6] += (board[9] + 1)
-                board[3] = 0
-                board[9] = 0
-            elif index - 1 % 14 == 2:
-                board[6] += (board[10] + 1)
-                board[2] = 0
-                board[10] = 0
-            elif index - 1 % 14 == 1:
-                board[6] += (board[11] + 1)
-                board[11] = 0
-                board[1] = 0
-            elif index - 1 % 14 == 0:
-                board[6] += (board[12] + 1)
-                board[12] = 0
-                board[0] = 0
-    elif num > 6 and index - 1 % 14 > 6 and index - 1 % 14 < 13:
-        if board[index - 1 % 14] == 1:
-
-            if index - 1 % 14 == 7:
-                board[13] += (board[5] + 1)
-                board[7] = 0
-                board[5] = 0
-            elif index - 1 % 14 == 8:
-                board[13] += (board[4] + 1)
-                board[4] = 0
-                board[8] = 0
-            elif index - 1 % 14 == 9:
-                board[13] += (board[3] + 1)
-                board[3] = 0
-                board[9] = 0
-            elif index - 1 % 14 == 10:
-                board[13] += (board[2] + 1)
-                board[2] = 0
-                board[10] = 0
-            elif index - 1 % 14 == 11:
-                board[13] += (board[1] + 1)
-                board[11] = 0
-                board[1] = 0
-            elif index - 1 % 14 == 12:
-                board[13] += (board[0] + 1)
-                board[12] = 0
-                board[0] = 0
-    if index - 1 % 14 == 6 or index - 1 % 14 == 13:
-        flag = 1
     return flag
 
 
