@@ -1,4 +1,5 @@
 from random import randint
+from datetime import datetime
 
 board = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0]
 thisdict = {
@@ -15,10 +16,43 @@ thisdict = {
     "K": 11,
     "L": 12,
 }
-
+loadList = []
 
 def convert(str):
     return thisdict[str.upper()]
+
+
+def get_key(val):
+    for key, value in thisdict.items():
+        if val == value:
+            return key
+
+
+def listToString(s):
+    # initialize an empty string
+    return ' '.join([str(elem) for elem in s])
+
+
+def save(board, playerOne, mode, stealing):
+    f = open("data.txt", "a")
+    st = listToString(
+        [str(datetime.now()), ",", listToString(board), ",", str(playerOne), ",", str(mode), ",", str(stealing), "\n"])
+    f.write(st)
+    f.close()
+
+
+def load():
+    f = open("data.txt", "r")
+    string = ""
+    string = f.read()
+    loadList = str(string).split("\n")
+    for i in range(len(loadList) - 1):
+       print(i + 1, "    ", str(loadList[i]).replace(",", "     "))
+    loadGame = int(input("Pick a game to load: "))
+    string = loadList[loadGame - 1]
+    loaded = str(string).split(",")
+    f.close()
+    return loaded
 
 
 def Game_design(board):
@@ -27,8 +61,6 @@ def Game_design(board):
     print("|{}|                                          |{}|".format(board[13], board[6]))
     print("    ,|A:{}|,|B:{}|,|C:{}|,|D:{}|,|E:{}|,|F:{}|,".format(board[0], board[1], board[2], board[3], board[4],
                                                                    board[5]))
-
-
 
 
 def moving(board, num, stealing):
@@ -73,6 +105,56 @@ def moving(board, num, stealing):
     return flag
 
 
+def heuristicVal(board):
+    if is_end(board):
+        if board[13] > board[6]:
+            return 100
+        elif board[13] == board[6]:
+            return 0
+        else:
+            return -100
+    else:
+        return board[13] - board[6]
+
+
+def minnmax(board, depth, alpha, beta, MinorMax, stealing):
+    if depth == 0 or is_end(board):
+        # print("reached ")
+        return heuristicVal(board), -1
+    if MinorMax:
+        v = -1000000
+        move = -1
+        for i in range(7, 13, 1):
+            if board[i] == 0: continue
+            a = board[:]
+            minormax = moving(a, i, stealing);
+            newv, _ = minnmax(a, depth - 1, alpha, beta, minormax, stealing)
+            if v < newv:
+                move = i
+                v = newv
+            alpha = max(alpha, v)
+            if alpha >= beta:
+                # print("breaking ", i)
+                break
+        return v, move
+    else:
+        v = 1000000
+        move = -1
+        for i in range(0, 6, 1):
+            if board[i] == 0: continue
+            a = board[:]
+            minormax = moving(a, i, stealing);
+            newv, _ = minnmax(a, depth - 1, alpha, beta, not minormax, stealing)
+            if v > newv:
+                move = i
+                v = newv
+            beta = min(beta, v)
+            if alpha >= beta:
+                # print("breaking ", i)
+                break
+        return v, move
+
+
 def is_end(board):  # check if game is end
     if sum(board[0:6]) == 0 or sum(board[7:13]) == 0:
         board[13] += sum(board[7:13])
@@ -93,7 +175,9 @@ def end_of_game(board):  # if game is end so print scores
         if board[6] > board[13]:
             print("player one win ")
             print("score", board[6], ":", board[13])
-
+        elif board[6] == board[13]:
+            print("Draw ")
+            print("score", board[13], ":", board[6])
         else:
             print("player two win ")
             print("score", board[13], ":", board[6])
@@ -103,42 +187,67 @@ def end_of_game(board):  # if game is end so print scores
     return flag
 
 
-value = randint(0, 1)  # if value = 0 player start else bot start
-if value == 0:
-    print("=============== Player One ===============")
-else:
-    print("=============== Player Two ===============")
-Game_design(board)
-print("==========================================")
-playing = True
-bot = False
 playerone = True
+bot = False
+stealing = 0
+depth = 7
+loadGame = int(input("Enter 0 for New Game, 1 to Load a saved game: "))
+if loadGame == 1:
+    loadedGame = load()
+    temp = loadedGame[1].split(" ")
+    for i in range(len(temp)):
+        board [i] = int(temp[i])
+    if loadedGame[2] != "True":
+        playerone = False
+        bot = True
+        print("=============== Player Two ===============")
+    else:
+        print("=============== Player One ===============")
+    Game_design(board)
+    print("==========================================")
+    depth = int(loadedGame[3])
+    stealing = int(loadedGame[4])
+else:
+    stealing = int(input("Enter 1 for stealing and 0 for not stealing: "))
+    mode = int(input("Enter 1 for easy ,2 for medium and 3 for hard "))
+    if mode == 1:
+        depth = 4
+    elif mode == 2:
+        depth = 7
+    else:
+        depth = 10
+    value = randint(0, 1)  # if value = 0 player start else bot start
+    if value == 0:
+        print("=============== Player One ===============")
+    else:
+        playerone = False
+        bot = True
+        print("=============== Player Two ===============")
+    Game_design(board)
+    print("==========================================")
 
-if value == 1:
-    playerone = False
-    bot = True
 
+playing = True
 while playing:
 
     playagain = 0
     while playerone:
         num = input("player one Enter the number: ")
+        if num == "save":
+            save(board, playerone, depth, stealing)
+            num = input("player one Enter the number: ")
         num = convert(num)
         if 0 <= num <= 5 and board[num] != 0:
-            playagain = moving_withstealing(board, num)
-
+            playagain = moving(board, num, stealing)
+            print("Move ==> {}".format(get_key(num)))
             Game_design(board)
             print("==========================================")
-            print("\n")
             if playagain != 1:
                 playerone = False
         else:
             print("invalid play")
             print("\n")
         bot = True
-        if is_end(board):
-            playing = False
-            break
 
     playagain = 0
     if end_of_game(board):
@@ -146,24 +255,25 @@ while playing:
         break
 
     while bot:
-        num = input("player two Enter the number")
-        num = convert(num)
-
+        # num = input("player two Enter the number")
+        # num = convert(num)
+        _, num = minnmax(board, depth, -100000, 100000, True, stealing)
         if 7 <= num <= 12 and board[num] != 0:
-            playagain = moving_withstealing(board, num)
-
+            playagain = moving(board, num, stealing)
+            print("Move ==> {}".format(get_key(num)))
             print("=============that is bot ================")
             Game_design(board)
             print("==========================================")
             if playagain != 1:
                 bot = False
+        elif num == -1:
+            end_of_game(board)
+            playing = False
+            break
         else:
             print("invalid play")
             print("\n")
         playerone = True
-        if is_end(board):
-            playing = False
-            break
 
     if end_of_game(board):
         playing = False
