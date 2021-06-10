@@ -33,10 +33,10 @@ def listToString(s):
     return ' '.join([str(elem) for elem in s])
 
 
-def save(board, playerOne, mode, stealing):
+def save(board, playerOne, withBot, mode, stealing):
     f = open("data.txt", "a")
     st = listToString(
-        [str(datetime.now()), ",", listToString(board), ",", str(playerOne), ",", str(mode), ",", str(stealing), "\n"])
+        [str(datetime.now()), ",", listToString(board), ",", str(playerOne), ",", str(withBot), ",", str(mode), ",", str(stealing), "\n"])
     f.write(st)
     f.close()
 
@@ -140,18 +140,24 @@ def end_of_game(board):  # if game is end so print scores
 
 
 playerone = True
+withBot = False
 bot = False
 stealing = 0
 depth = 7
+value = 0
 loadGame = int(input("Enter 0 for New Game, 1 to Load a saved game: "))
 if loadGame == 1:
     loadedGame = load()
     temp = loadedGame[1].split(" ")
     for i in range(len(temp)):
         board [i] = int(temp[i])
-    if loadedGame[2] != "True":
+    if loadedGame[2] != "True" and loadedGame[3] == "True":
         playerone = False
+        withBot = True
         bot = True
+        print("=================== Bot ===================")
+    elif loadedGame[2] != "True" and loadedGame[3] == "False":
+        playerone = False
         print("=============== Player Two ===============")
     else:
         print("=============== Player One ===============")
@@ -161,20 +167,26 @@ if loadGame == 1:
     stealing = int(loadedGame[4])
 else:
     stealing = int(input("Enter 1 for stealing and 0 for not stealing: "))
-    mode = int(input("Enter 1 for easy ,2 for medium and 3 for hard "))
-    if mode == 1:
-        depth = 4
-    elif mode == 2:
-        depth = 7
-    else:
-        depth = 10
-    value = int(input("Enter 0 for start first or 1 to let bot start "))  # if value = 0 player start else bot start
+    withBot = bool(int(input("Enter 0 to play against player or 1 to play against bot: ")))
+    if withBot:
+        mode = int(input("Enter 1 for easy ,2 for medium and 3 for hard "))
+        if mode == 1:
+            depth = 4
+        elif mode == 2:
+            depth = 7
+        else:
+            depth = 10
+        value = int(input("Enter 0 to start first or 1 to let bot start: "))  # if value = 0 player start else bot start
     if value == 0:
         print("=============== Player One ===============")
-    else:
+    elif withBot and value == 1:
         playerone = False
         bot = True
-        print("=============== Player Two ===============")
+        print("=================== Bot ===================")
+    # else:
+    #     playerone = False
+    #     bot = False
+    #     print("=============== Player Two ===============")
     Game_design(board)
     print("==========================================")
 
@@ -192,6 +204,10 @@ while playing:
         if 0 <= num <= 5 and board[num] != 0:
             playagain = moving(board, num, stealing)
             print("Move ==> {}".format(get_key(num)))
+            if withBot:
+                print("================ Bot =================")
+            else :
+                print("============ Player Two ==============")
             Game_design(board)
             print("==========================================")
             if playagain != 1:
@@ -199,19 +215,45 @@ while playing:
         else:
             print("invalid play")
             print("\n")
-        bot = True
+        if withBot:
+            bot = True
 
     playagain = 0
     if end_of_game(board):
         playing = False
         break
 
-    while bot:
-        _, num = min_value((board, 0), depth, stealing = stealing)
+    while not playerone and not withBot:
+        num = input("player Two Enter the number: ")
+        if num == "save":
+            save(board, playerone, depth, stealing)
+            num = input("player Two Enter the number: ")
+        num = convert(num)
+        if 7 <= num <= 13 and board[num] != 0:
+            playagain = moving(board, num, stealing)
+            print("Move ==> {}".format(get_key(num)))
+            if withBot:
+                print("================ Bot =================")
+            else:
+                print("============ Player One ==============")
+            Game_design(board)
+            print("==========================================")
+            if playagain != 1:
+                playerone = True
+        else:
+            print("invalid play")
+            print("\n")
+
+    if end_of_game(board):
+        playing = False
+        break
+
+    while bot and withBot:
+        _, num = min_value((board, 0), depth, stealing=stealing)
         if 7 <= num <= 12 and board[num] != 0:
             playagain = moving(board, num, stealing)
             print("Move ==> {}".format(get_key(num)))
-            print("=============that is bot ================")
+            print("================= Bot ====================")
             Game_design(board)
             print("==========================================")
             if playagain != 1:
