@@ -148,9 +148,9 @@ value = 0
 loadGame = int(input("Enter 0 for New Game, 1 to Load a saved game: "))
 if loadGame == 1:
     loadedGame = load()
-    temp = loadedGame[1].split(" ")
+    temp = loadedGame[1].strip().split(" ")
     for i in range(len(temp)):
-        board [i] = int(temp[i])
+        board[i] = int(temp[i])
     if loadedGame[2] != "True" and loadedGame[3] == "True":
         playerone = False
         withBot = True
@@ -163,8 +163,8 @@ if loadGame == 1:
         print("=============== Player One ===============")
     Game_design(board)
     print("==========================================")
-    depth = int(loadedGame[3])
-    stealing = int(loadedGame[4])
+    depth = int(loadedGame[4])
+    stealing = int(loadedGame[5])
 else:
     stealing = int(input("Enter 1 for stealing and 0 for not stealing: "))
     withBot = bool(int(input("Enter 0 to play against player or 1 to play against bot: ")))
@@ -198,7 +198,7 @@ while playing:
     while playerone:
         num = input("player one Enter the number: ")
         if num == "save":
-            save(board, playerone, depth, stealing)
+            save(board, playerone,withBot, depth, stealing)
             num = input("player one Enter the number: ")
         num = convert(num)
         if 0 <= num <= 5 and board[num] != 0:
